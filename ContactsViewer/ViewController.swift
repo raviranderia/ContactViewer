@@ -11,14 +11,14 @@ import Contacts
 import ContactsUI
 
 
-class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource {
+class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource, UISearchResultsUpdating   {
 
     @IBOutlet weak var contactsTableView: UITableView!
 
     lazy var contactsFinder = ContactsFetcher()
+    var resultSearchController = UISearchController()
     var contacts = [Contact]()
     var filteredContacts = [Contact]()
-    var searchActive : Bool = false
 
 
     func presentAlertController(number : String)   {
@@ -42,9 +42,21 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
+       
+        
         DispatchQueue.global().async {
             self.contacts = self.contactsFinder.returnAllContacts()
             DispatchQueue.main.async {
+                self.resultSearchController = ({
+                    let controller = UISearchController(searchResultsController: nil)
+                    controller.searchResultsUpdater = self
+                    controller.dimsBackgroundDuringPresentation = false
+                    controller.searchBar.sizeToFit()
+                    
+                    self.contactsTableView.tableHeaderView = controller.searchBar
+                    
+                    return controller
+                })()
                 self.contactsTableView.reloadData()
             }
         }
@@ -72,7 +84,7 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! ContactsTableViewCell
         
         
-        if(searchActive){
+        if (self.resultSearchController.isActive) {
             let contact = filteredContacts[indexPath.row]
             cell.nameLabel.text = contact.firstName
             cell.numberLabel.text = contact.firstPhoneNumber
@@ -91,14 +103,14 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        if(searchActive) {
+        if (self.resultSearchController.isActive) {
             return filteredContacts.count
         }
         return contacts.count
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if(searchActive){
+        if (self.resultSearchController.isActive) {
             let contact = filteredContacts[indexPath.row]
             if let contactNumber = contact.firstPhoneNumber {
                 presentAlertController(number: contactNumber)
@@ -111,23 +123,30 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         }
 
     }
+    
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        
+        filteredContacts.removeAll(keepingCapacity: false)
+        
+        filterContentForSearchText(searchText: searchController.searchBar.text!)
+        
+        
+    }
+    
+    func filterContentForSearchText(searchText: String, scope: String = "All") {
+        filteredContacts = contacts.filter { contact in
+            let firstName : NSString = contact.firstName as NSString
+            return firstName.contains(searchText)
+        }
+        
+    }
 }
 
 // Handles Search Functionality
 
 
-extension ViewController :  UISearchBarDelegate, UISearchDisplayDelegate  {
-    
-    func filterContentForSearchText(searchText: String) {
-        
-        filteredContacts = contacts.filter({ (contact) -> Bool in
-            let tmp: NSString = contact.firstName as NSString
-            let range = tmp.range(of: searchText, options: NSString.CompareOptions.caseInsensitive)
-            return range.location != NSNotFound
-        })
-    }
- 
     
     
-}
+
 
