@@ -11,13 +11,14 @@ import Contacts
 import ContactsUI
 
 
-class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource, UISearchResultsUpdating,UISearchControllerDelegate  {
+class ContactViewController: UIViewController,UITableViewDelegate,UITableViewDataSource, UISearchResultsUpdating,UISearchControllerDelegate  {
 
     @IBOutlet weak var contactsTableView: UITableView!
 
     
     var contactsViewModel = ContactsViewModel()
     var resultSearchController = UISearchController()
+    var sectionViewModel = SectionViewModel()
 
     func presentCallAlertController(name : String,number : String)   {
         let alertController = UIAlertController(title: "Call?", message: "Would you like to call \(name) at number: \(number)?", preferredStyle: .alert)
@@ -62,7 +63,8 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         DispatchQueue.global().async {
-            self.contactsViewModel.generateContactList()
+            self.contactsViewModel.generateContactArray()
+            print(self.sectionViewModel.convertContactsToADictionaryModelForSections(contactsArray: self.contactsViewModel.searchResults))
             DispatchQueue.main.async {
                 self.resultSearchController = ({
                     let controller = UISearchController(searchResultsController: nil)

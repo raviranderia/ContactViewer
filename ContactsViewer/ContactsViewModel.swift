@@ -7,14 +7,13 @@
 //
 
 import Foundation
-import Contacts
 import UIKit
 
 
 class ContactsViewModel {
     
-    private let store = CNContactStore()
     private var contacts = [Contact]()
+    private var contactsFramework = ContactsFetcherFramework()
     private var filteredContacts = [Contact]()
     private var searchIsActive = Bool()
     
@@ -27,8 +26,8 @@ class ContactsViewModel {
     }
 
     //Returns all contacts from the phonebook
-    func generateContactList(){
-        self.contacts = returnAllContacts()
+    func generateContactArray(){
+        self.contacts = contactsFramework.returnAllContacts()
     }
     
     //Search Helper Functions
@@ -60,43 +59,7 @@ class ContactsViewModel {
         return String(text.characters.filter {okayChars.contains($0) })
     }
     
-    private func returnAllContacts() -> [Contact] {
-        
-        var contacts = [CNContact]()
-        let keysToFetch = [CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
-                           CNContactImageDataKey,
-                           CNContactPhoneNumbersKey] as [Any]
-        
-        let fetchRequest = CNContactFetchRequest(keysToFetch: keysToFetch as! [CNKeyDescriptor])
-        
-        do {
-            try store.enumerateContacts(with: fetchRequest, usingBlock: { ( contact, stop) -> Void in
-                contacts.append(contact)
-            })
-        }
-        catch let error as NSError {
-            print(error.localizedDescription)
-        }
-        return convertToContactModel(contactListArray: contacts).sorted(by: ({$0.firstName < $1.firstName}))
-    }
     
-    private func convertToContactModel(contactListArray : [CNContact]) -> [Contact] {
-        
-        var contactsModel = [Contact]()
-        for contact in contactListArray {
-            contactsModel.append(Contact(firstName: contact.givenName, firstPhoneNumber: self.returnFirstNumberFrom(contact: contact)))
-        }
-        
-        return contactsModel
-        
-    }
-    
-    private func returnFirstNumberFrom(contact : CNContact) -> String? {
-        let phoneNumber = contact.phoneNumbers
-        return phoneNumber.first?.value.stringValue
-        
-    }
-
     private func filterContentForSearchText(searchText: String, scope: String = "All") {
         filteredContacts = contacts.filter { contact in
             return contact.firstName.contains(searchText)
