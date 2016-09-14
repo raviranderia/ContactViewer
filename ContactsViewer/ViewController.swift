@@ -11,18 +11,16 @@ import Contacts
 import ContactsUI
 
 
-class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource, UISearchResultsUpdating   {
+class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource, UISearchResultsUpdating,UISearchControllerDelegate  {
 
     @IBOutlet weak var contactsTableView: UITableView!
 
-    lazy var contactsFinder = ContactsFetcher()
+    
+    var contactsViewModel = ContactsViewModel()
     var resultSearchController = UISearchController()
-    var contacts = [Contact]()
-    var filteredContacts = [Contact]()
 
-
-    func presentAlertController(number : String)   {
-        let alertController = UIAlertController(title: "Call?", message: "Are you sure you want to place this call?", preferredStyle: .alert)
+    func presentCallAlertController(name : String,number : String)   {
+        let alertController = UIAlertController(title: "Call?", message: "Would you like to call \(name) at number: \(number)?", preferredStyle: .alert)
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action:UIAlertAction!) in
             print("cancelled")
@@ -35,17 +33,36 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         }
         alertController.addAction(OKAction)
         
-        self.present(alertController, animated: true, completion:nil)
+        if resultSearchController.isActive {
+            self.resultSearchController.present(alertController, animated: true, completion: nil)
+        }
+        else{
+            self.present(alertController, animated: true, completion:nil)
+        }
+    }
+    
+    func presentErrorAlertController(){
+        let alertController = UIAlertController(title: "Error", message: "Cannot call since no number is associated with this contact" , preferredStyle: .alert)
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action:UIAlertAction!) in
+            print("cancelled")
+        }
+        alertController.addAction(cancelAction)
+        
+        if resultSearchController.isActive {
+            self.resultSearchController.present(alertController, animated: true, completion: nil)
+        }
+        else{
+            self.present(alertController, animated: true, completion:nil)
+        }
+
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        
-       
-        
         DispatchQueue.global().async {
-            self.contacts = self.contactsFinder.returnAllContacts()
+            self.contactsViewModel.generateContactList()
             DispatchQueue.main.async {
                 self.resultSearchController = ({
                     let controller = UISearchController(searchResultsController: nil)
@@ -54,10 +71,10 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
                     controller.searchBar.sizeToFit()
                     
                     self.contactsTableView.tableHeaderView = controller.searchBar
-                    
                     return controller
                 })()
-                self.contactsTableView.reloadData()
+            self.resultSearchController.delegate = self
+            self.contactsTableView.reloadData()
             }
         }
     }
@@ -67,80 +84,60 @@ class ViewController: UIViewController,UITableViewDelegate,UITableViewDataSource
         // Dispose of any resources that can be recreated.
     }
     
-    //Calling Functionality using NSURL
-    func makeACallTo(number:String){
-        if let url:NSURL = NSURL(string: "tel://\(number)") {
-            UIApplication.shared.openURL(url as URL)
-        }
-    }
-    
-    
-    
-    
-    
     //Table View Functions
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! ContactsTableViewCell
-        
-        
-        if (self.resultSearchController.isActive) {
-            let contact = filteredContacts[indexPath.row]
-            cell.nameLabel.text = contact.firstName
-            cell.numberLabel.text = contact.firstPhoneNumber
-        
-        } else {
-            let contact = contacts[indexPath.row]
-            cell.nameLabel.text = contact.firstName
-            cell.numberLabel.text = contact.firstPhoneNumber
-        }
-        
-        
-        
-        return cell
+        return contactsViewModel.setupTableViewCell(cell: cell, indexPath: indexPath)
     }
  
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
-        if (self.resultSearchController.isActive) {
-            return filteredContacts.count
-        }
-        return contacts.count
+        return self.contactsViewModel.searchResults.count
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if (self.resultSearchController.isActive) {
-            let contact = filteredContacts[indexPath.row]
-            if let contactNumber = contact.firstPhoneNumber {
-                presentAlertController(number: contactNumber)
-            }
-        } else {
-            let contact = contacts[indexPath.row]
-            if let contactNumber = contact.firstPhoneNumber {
-                presentAlertController(number: contactNumber)
-            }
+        let contact = self.contactsViewModel.searchResults[indexPath.row]
+        if let contactNumber = contact.firstPhoneNumber {
+            presentCallAlertController(name: contact.firstName,number: contactNumber)
         }
-
+        else{
+            self.presentErrorAlertController()
+        }
     }
     
+    func willPresentSearchController(_ searchController: UISearchController) {
+        print("setActive")
+        self.contactsViewModel.setSearchActive()
+    }
+    
+    func willDismissSearchController(_ searchController: UISearchController) {
+        print("dismissed")
+        self.contactsViewModel.setSearchInactive()
+    }
     
     func updateSearchResults(for searchController: UISearchController) {
-        
-        filteredContacts.removeAll(keepingCapacity: false)
-        
-        filterContentForSearchText(searchText: searchController.searchBar.text!)
-        
-        
+        print("updated")
+        print(resultSearchController.searchBar.text)
+        self.contactsViewModel.updateSearchResults(text: resultSearchController.searchBar.text!)
+        self.contactsTableView.reloadData()
     }
     
-    func filterContentForSearchText(searchText: String, scope: String = "All") {
-        filteredContacts = contacts.filter { contact in
-            let firstName : NSString = contact.firstName as NSString
-            return firstName.contains(searchText)
+    //Call Function
+    func makeACallTo(number:String){
+        if number != "" {
+            DispatchQueue.main.async {
+                if let url:URL = URL(string: "tel://\(self.contactsViewModel.removeSpecialCharsFromString(text: number))") {
+                    UIApplication.shared.openURL(url)
+                }
+            }
         }
-        
+        else{
+            self.presentErrorAlertController()
+        }
     }
+    
+    
 }
 
 // Handles Search Functionality
