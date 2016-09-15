@@ -60,7 +60,7 @@ struct SearchModel : SearchModelProtocol {
     
     private mutating func filterContentForSearchText(searchText: String, scope: String = "All") {
         filteredContacts = contacts.filter { contact in
-            return contact.firstName.lowercased().contains(searchText.lowercased())
+            return contact.firstName.lowercased().contains(searchText.lowercased()) || contact.firstPhoneNumber!.contains((searchText))
         }
     }
     
