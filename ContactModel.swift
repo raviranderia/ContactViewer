@@ -9,7 +9,7 @@
 import Foundation
 import Contacts
 
-class Contact {
+class ContactModel {
     var firstName : String
     var firstPhoneNumber : String?
     
@@ -22,20 +22,20 @@ class Contact {
         self.firstName = ""
     }
     
-    func convertToContactModel(contactArray : [CNContact]) -> [Contact] {
+    static func convertToContactModel(contactArray : [CNContact]) -> [ContactModel] {
         
-        var contactsModel = [Contact]()
+        var contactsModel = [ContactModel]()
         for contact in contactArray {
             if contact.givenName != "" {
                 if let phoneNumber = returnFirstNumberFrom(contact: contact) {
-                    contactsModel.append(Contact(firstName: contact.givenName, firstPhoneNumber: phoneNumber))
+                    contactsModel.append(ContactModel(firstName: contact.givenName, firstPhoneNumber: phoneNumber))
                 }
             }
         }
         return contactsModel
     }
     
-    private func returnFirstNumberFrom(contact : CNContact) -> String? {
+    static private func returnFirstNumberFrom(contact : CNContact) -> String? {
         let phoneNumber = contact.phoneNumbers
         return phoneNumber.first?.value.stringValue
         

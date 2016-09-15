@@ -9,14 +9,18 @@
 import Foundation
 
 
-class SectionViewModel {
+class SectionModel {
     
-    func convertContactsToADictionaryModelForSections(contactsArray : [Contact]) ->  [Character: [Contact]] {
-        
-        var letters: [Character]
+    var letters = [Character]()
+    var contactsDictionary = [Character: [ContactModel]]()
+    
+    func generateSectionsForModel(contacts : [ContactModel]) {
+        self.convertContactsToADictionaryModelForSections(contactsArray: contacts)
+    }
+    
+    func convertContactsToADictionaryModelForSections(contactsArray : [ContactModel]) {
         
         letters = self.makeLetterArray(contactsArray: contactsArray)
-        
         letters = letters.reduce([], { (list, name) -> [Character] in
             if !list.contains(name) {
                 return list + [name]
@@ -24,21 +28,17 @@ class SectionViewModel {
             return list
         })
         
-        var contactsDictionary = [Character: [Contact]]()
-        
         for contact in contactsArray {
             
             if contactsDictionary[contact.firstName[contact.firstName.startIndex]] == nil {
-                contactsDictionary[contact.firstName[contact.firstName.startIndex]] = [Contact]()
+                contactsDictionary[contact.firstName[contact.firstName.startIndex]] = [ContactModel]()
             }
             contactsDictionary[contact.firstName[contact.firstName.startIndex]]!.append(contact)
         }
-        
-        return contactsDictionary
     }
     
 
-    private func makeLetterArray(contactsArray : [Contact]) -> [Character] {
+    private func makeLetterArray(contactsArray : [ContactModel]) -> [Character] {
         
         let contactsWithNames = contactsArray.filter { (contact) -> Bool in
             return contact.firstName != ""
@@ -49,4 +49,19 @@ class SectionViewModel {
         }.sorted()
 
     }
+    
+    func rowsForSection(indexPath : IndexPath) -> ContactModel {
+        
+        let contactArrayForCharacter = contactsDictionary[letters.sorted()[indexPath.section]]
+        return contactArrayForCharacter![indexPath.row]
+        
+    }
+    
+    func findContactForIndexPath(indexPath : IndexPath) -> ContactModel {
+        let sectionContact = rowsForSection(indexPath: indexPath)
+        return sectionContact
+    }
+    
+    
+    
 }

@@ -14,12 +14,100 @@ import ContactsUI
 class ContactViewController: UIViewController,UITableViewDelegate,UITableViewDataSource, UISearchResultsUpdating,UISearchControllerDelegate  {
 
     @IBOutlet weak var contactsTableView: UITableView!
-
     
-    var contactsViewModel = ContactsViewModel()
-    var resultSearchController = UISearchController()
-    var sectionViewModel = SectionViewModel()
+    var contactViewModel = ContactViewModel()
+    var resultSearchController : UISearchController!
 
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        self.setupSearchController()
+        DispatchQueue.global().async {
+            self.contactViewModel.generateContactArrayAndSectionDictionary()
+            DispatchQueue.main.async {
+                self.contactsTableView.reloadData()
+            }
+        }
+    }
+    
+    func setupSearchController() {
+        self.resultSearchController = ({
+            let controller = UISearchController(searchResultsController: nil)
+            controller.searchResultsUpdater = self
+            controller.dimsBackgroundDuringPresentation = false
+            controller.searchBar.sizeToFit()
+            self.contactsTableView.tableHeaderView = controller.searchBar
+            return controller
+        })()
+        self.resultSearchController.delegate = self
+
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    //Table View Functions
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! ContactsTableViewCell
+        return contactViewModel.setupTableViewCell(cell: cell, indexPath: indexPath)
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return contactViewModel.numberOfSections
+    }
+    
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return contactViewModel.titleForHeaders(section: section)
+    }
+ 
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+       return contactViewModel.numberOfRowsInSection(section: section)
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        let contact = self.contactViewModel.didSelectRowReturnContact(indexPath: indexPath)
+        presentCallAlertController(name: contact.firstName,number: contact.firstPhoneNumber!)
+    }
+    
+    func willPresentSearchController(_ searchController: UISearchController) {
+        print("setActive")
+        self.contactViewModel.setSearchActive()
+    }
+    
+    func willDismissSearchController(_ searchController: UISearchController) {
+        print("dismissed")
+        self.contactViewModel.setSearchInactive()
+    }
+    
+    func updateSearchResults(for searchController: UISearchController) {
+        print("updated")
+        print(resultSearchController.searchBar.text)
+        self.contactViewModel.updateSearchResults(text: resultSearchController.searchBar.text!)
+        self.contactsTableView.reloadData()
+    }
+    
+    //Call Function
+    func makeACallTo(number:String){
+        if number != "" {
+            DispatchQueue.main.async {
+                if let url:URL = URL(string: "tel://\(self.contactViewModel.removeSpecialCharsFromString(text: number))") {
+                    UIApplication.shared.openURL(url)
+                }
+            }
+        }
+        else{
+            self.presentErrorAlertController()
+        }
+    }
+    
+    
     func presentCallAlertController(name : String,number : String)   {
         let alertController = UIAlertController(title: "Call?", message: "Would you like to call \(name) at number: \(number)?", preferredStyle: .alert)
         
@@ -34,7 +122,7 @@ class ContactViewController: UIViewController,UITableViewDelegate,UITableViewDat
         }
         alertController.addAction(OKAction)
         
-        if resultSearchController.isActive {
+        if contactViewModel.searchIsActive{
             self.resultSearchController.present(alertController, animated: true, completion: nil)
         }
         else{
@@ -50,102 +138,14 @@ class ContactViewController: UIViewController,UITableViewDelegate,UITableViewDat
         }
         alertController.addAction(cancelAction)
         
-        if resultSearchController.isActive {
+        if contactViewModel.searchIsActive {
             self.resultSearchController.present(alertController, animated: true, completion: nil)
         }
         else{
             self.present(alertController, animated: true, completion:nil)
         }
-
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        DispatchQueue.global().async {
-            self.contactsViewModel.generateContactArray()
-            print(self.sectionViewModel.convertContactsToADictionaryModelForSections(contactsArray: self.contactsViewModel.searchResults))
-            DispatchQueue.main.async {
-                self.resultSearchController = ({
-                    let controller = UISearchController(searchResultsController: nil)
-                    controller.searchResultsUpdater = self
-                    controller.dimsBackgroundDuringPresentation = false
-                    controller.searchBar.sizeToFit()
-                    
-                    self.contactsTableView.tableHeaderView = controller.searchBar
-                    return controller
-                })()
-            self.resultSearchController.delegate = self
-            self.contactsTableView.reloadData()
-            }
-        }
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
-    //Table View Functions
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! ContactsTableViewCell
-        return contactsViewModel.setupTableViewCell(cell: cell, indexPath: indexPath)
-    }
- 
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.contactsViewModel.searchResults.count
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let contact = self.contactsViewModel.searchResults[indexPath.row]
-        if let contactNumber = contact.firstPhoneNumber {
-            presentCallAlertController(name: contact.firstName,number: contactNumber)
-        }
-        else{
-            self.presentErrorAlertController()
-        }
-    }
-    
-    func willPresentSearchController(_ searchController: UISearchController) {
-        print("setActive")
-        self.contactsViewModel.setSearchActive()
-    }
-    
-    func willDismissSearchController(_ searchController: UISearchController) {
-        print("dismissed")
-        self.contactsViewModel.setSearchInactive()
-    }
-    
-    func updateSearchResults(for searchController: UISearchController) {
-        print("updated")
-        print(resultSearchController.searchBar.text)
-        self.contactsViewModel.updateSearchResults(text: resultSearchController.searchBar.text!)
-        self.contactsTableView.reloadData()
-    }
-    
-    //Call Function
-    func makeACallTo(number:String){
-        if number != "" {
-            DispatchQueue.main.async {
-                if let url:URL = URL(string: "tel://\(self.contactsViewModel.removeSpecialCharsFromString(text: number))") {
-                    UIApplication.shared.openURL(url)
-                }
-            }
-        }
-        else{
-            self.presentErrorAlertController()
-        }
+        
     }
     
     
 }
-
-// Handles Search Functionality
-
-
-    
-    
-
-

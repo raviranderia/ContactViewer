@@ -10,24 +10,26 @@ import Foundation
 import UIKit
 
 
-class ContactsViewModel {
+class SearchModel {
     
-    private var contacts = [Contact]()
-    private var contactsFramework = ContactsFetcherFramework()
-    private var filteredContacts = [Contact]()
-    private var searchIsActive = Bool()
+    private var contacts = [ContactModel]()
     
+    private var contactsFramework = ContactsFetcher()
+    private var filteredContacts = [ContactModel]()
+    private(set) var searchIsActive = Bool()
+ 
     //Returns contactList based on search text
-    var searchResults : [Contact] {
+    var searchResults : [ContactModel] {
         if searchIsActive {
             return filteredContacts
         }
-        return contacts
+        return []
     }
 
     //Returns all contacts from the phonebook
-    func generateContactArray(){
+    func generateContactArray() -> [ContactModel]{
         self.contacts = contactsFramework.returnAllContacts()
+        return self.contacts
     }
     
     //Search Helper Functions
@@ -35,7 +37,7 @@ class ContactsViewModel {
         filteredContacts.removeAll(keepingCapacity: false)
         filterContentForSearchText(searchText: text)
     }
- 
+    
     func setSearchActive(){
         self.searchIsActive = true
     }
@@ -44,20 +46,9 @@ class ContactsViewModel {
         self.searchIsActive = false
     }
     
-  
     
     //Setup TableView Function
-    func setupTableViewCell(cell : ContactsTableViewCell,indexPath : IndexPath) -> ContactsTableViewCell {
-        cell.nameLabel.text = searchResults[indexPath.row].firstName
-        cell.numberLabel.text = searchResults[indexPath.row].firstPhoneNumber
-        return cell
-    }
-    
-    func removeSpecialCharsFromString(text: String) -> String {
-        let okayChars : Set<Character> =
-            Set("1234567890+".characters)
-        return String(text.characters.filter {okayChars.contains($0) })
-    }
+
     
     
     private func filterContentForSearchText(searchText: String, scope: String = "All") {

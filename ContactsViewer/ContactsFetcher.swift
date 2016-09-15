@@ -9,12 +9,27 @@
 import Foundation
 import Contacts
 
-class ContactsFetcherFramework {
+protocol ContactsFetcherProtocol {
+    func enumerateContacts(with: CNContactFetchRequest, usingBlock: (CNContact, UnsafeMutablePointer<ObjCBool>) -> Void)
+}
+
+extension CNContactStore : ContactsFetcherProtocol {
     
-    private let store = CNContactStore()
-    let contactModel = Contact()
+    internal func enumerateContacts(with: CNContactFetchRequest, usingBlock: (CNContact, UnsafeMutablePointer<ObjCBool>) -> Void) {
+        self.enumerateContacts(with: with, usingBlock: usingBlock)
+    }
+}
+
+class ContactsFetcher {
     
-    func returnAllContacts() -> [Contact] {
+    private let store: ContactsFetcherProtocol
+    private let contactModel = ContactModel()
+    
+    init(contactStore: ContactsFetcherProtocol = CNContactStore()) {
+        store = contactStore
+    }
+    
+    func returnAllContacts() -> [ContactModel] {
         
         var contacts = [CNContact]()
         let keysToFetch = [CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
@@ -24,6 +39,7 @@ class ContactsFetcherFramework {
         let fetchRequest = CNContactFetchRequest(keysToFetch: keysToFetch as! [CNKeyDescriptor])
         
         do {
+            
             try store.enumerateContacts(with: fetchRequest, usingBlock: { ( contact, stop) -> Void in
                 contacts.append(contact)
             })
@@ -31,12 +47,6 @@ class ContactsFetcherFramework {
         catch let error as NSError {
             print(error.localizedDescription)
         }
-        return contactModel.convertToContactModel(contactArray: contacts).sorted(by: ({$0.firstName < $1.firstName}))
+        return ContactModel.convertToContactModel(contactArray: contacts).sorted(by: ({$0.firstName < $1.firstName}))
     }
-    
-  
-  
-
-    
-    
 }

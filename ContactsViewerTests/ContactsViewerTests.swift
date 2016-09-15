@@ -26,10 +26,10 @@ class ContactsViewerTests: XCTestCase {
     func testRemoveSpecialCharactersFromNumber(){
         let dummyNumber = "+1(929)-253-2101"
         let answer = "+19292532101"
-        let viewModel = ContactsViewModel()
+        let viewModel = ContactViewModel()
         XCTAssertEqual(viewModel.removeSpecialCharsFromString(text: dummyNumber), answer)
         
     }
-    
+        
  
 }
