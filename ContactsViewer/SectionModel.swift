@@ -8,20 +8,16 @@
 
 import Foundation
 
-protocol SectionModelProtocol {
-    mutating func generateSectionsForModel( contacts : [ContactModel] )
-    func rowsForSection(indexPath : IndexPath) -> ContactModel
-    func findContactForIndexPath(indexPath : IndexPath) -> ContactModel
-}
-
-
-struct SectionModel : SectionModelProtocol {
+struct SectionModel : CurrentModelProtocol,Singleton {
     
     private(set) var letters = [Character]()
     private(set) var contactsDictionary = [ Character : [ContactModel] ]()
     
-    mutating func generateSectionsForModel( contacts : [ContactModel] ) {
-        convertContactsToADictionaryModelForSections(contactsArray: contacts)
+    static let sharedInstance = SectionModel()
+    private init() {}
+    
+    var numberOfSections: Int {
+        return letters.count
     }
     
     func rowsForSection(indexPath : IndexPath) -> ContactModel {
@@ -31,12 +27,44 @@ struct SectionModel : SectionModelProtocol {
         
     }
     
+    func setupTableViewCell(cell: ContactsTableViewCell, indexPath: IndexPath) -> ContactsTableViewCell {
+        
+        let sectionContact = rowsForSection(indexPath: indexPath)
+        cell.nameLabel.text = sectionContact.firstName
+        cell.numberLabel.text = sectionContact.firstPhoneNumber
+
+        return cell
+    }
+    
+    func titleForHeaders(section: Int) -> String? {
+        return String(letters.sorted()[section])
+    }
+    
+    func sectionIndexTitles() -> [String] {
+        return letters.sorted().map()  { (char) -> String in
+            return String(char)
+        }
+    }
+    
+    func numberOfRowsInSection(section : Int) -> Int {
+        let alphabet = letters.sorted()[section]
+        return contactsDictionary[alphabet]!.count
+    }
+    
+    mutating func generateSectionsForModel( contacts : [ContactModel] ) {
+        convertContactsToADictionaryModelForSections(contactsArray: contacts)
+    }
+    
+    func didSelectRowReturnContact(indexPath : IndexPath) -> ContactModel {
+        return findContactForIndexPath(indexPath: indexPath)
+    }
+    
     func findContactForIndexPath(indexPath : IndexPath) -> ContactModel {
         let sectionContact = rowsForSection(indexPath: indexPath)
         return sectionContact
     }
     
-    private mutating func convertContactsToADictionaryModelForSections(contactsArray : [ContactModel]) {
+    mutating func convertContactsToADictionaryModelForSections(contactsArray : [ContactModel]) {
         
         letters = makeLetterArray(contactsArray: contactsArray)
         letters = letters.reduce([], { (list, name) -> [Character] in
@@ -55,7 +83,7 @@ struct SectionModel : SectionModelProtocol {
         }
     }
     
-    private func makeLetterArray(contactsArray : [ContactModel]) -> [Character] {
+    func makeLetterArray(contactsArray : [ContactModel]) -> [Character] {
         
         let contactsWithNames = contactsArray.filter { (contact) -> Bool in
             return contact.firstName != ""
@@ -66,5 +94,4 @@ struct SectionModel : SectionModelProtocol {
             }.sorted()
         
     }
-    
 }

@@ -10,6 +10,7 @@
 		0D1DE1891D8ACB33002AC528 /* ContactViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D1DE1881D8ACB33002AC528 /* ContactViewModel.swift */; };
 		0D1F4CD61D873BAD00A7A5E6 /* SearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D1F4CD51D873BAD00A7A5E6 /* SearchModel.swift */; };
 		0D1F4CD81D873F3E00A7A5E6 /* ContactModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D1F4CD71D873F3E00A7A5E6 /* ContactModel.swift */; };
+		0D81F48F1D8B3F27007D9D9D /* CurrentModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D81F48E1D8B3F27007D9D9D /* CurrentModel.swift */; };
 		0DC328831D8992D10032E26C /* ContactsViewerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC328821D8992D10032E26C /* ContactsViewerTests.swift */; };
 		0DC3288B1D899A270032E26C /* SectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC3288A1D899A270032E26C /* SectionModel.swift */; };
 		0DC3288D1D89CC560032E26C /* ContactsFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DC3288C1D89CC560032E26C /* ContactsFetcher.swift */; };
@@ -35,6 +36,7 @@
 		0D1DE1881D8ACB33002AC528 /* ContactViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContactViewModel.swift; sourceTree = "<group>"; };
 		0D1F4CD51D873BAD00A7A5E6 /* SearchModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
 		0D1F4CD71D873F3E00A7A5E6 /* ContactModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ContactModel.swift; path = ../ContactModel.swift; sourceTree = "<group>"; };
+		0D81F48E1D8B3F27007D9D9D /* CurrentModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CurrentModel.swift; sourceTree = "<group>"; };
 		0DC328801D8992D10032E26C /* ContactsViewerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ContactsViewerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0DC328821D8992D10032E26C /* ContactsViewerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsViewerTests.swift; sourceTree = "<group>"; };
 		0DC328841D8992D10032E26C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -112,6 +114,7 @@
 				0D1F4CD91D8751E300A7A5E6 /* Resources */,
 				0DF312961D872B01003DAF70 /* ContactViewController.swift */,
 				0D1DE1881D8ACB33002AC528 /* ContactViewModel.swift */,
+				0D81F48E1D8B3F27007D9D9D /* CurrentModel.swift */,
 				0D1F4CD71D873F3E00A7A5E6 /* ContactModel.swift */,
 				0DC3288A1D899A270032E26C /* SectionModel.swift */,
 				0D1F4CD51D873BAD00A7A5E6 /* SearchModel.swift */,
@@ -236,6 +239,7 @@
 			files = (
 				0D1F4CD81D873F3E00A7A5E6 /* ContactModel.swift in Sources */,
 				0D1DE1891D8ACB33002AC528 /* ContactViewModel.swift in Sources */,
+				0D81F48F1D8B3F27007D9D9D /* CurrentModel.swift in Sources */,
 				0DF312971D872B01003DAF70 /* ContactViewController.swift in Sources */,
 				0DF312951D872B01003DAF70 /* AppDelegate.swift in Sources */,
 				0D1F4CD61D873BAD00A7A5E6 /* SearchModel.swift in Sources */,

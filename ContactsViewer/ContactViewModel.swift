@@ -31,10 +31,17 @@ protocol ContactViewModelProtocol {
     func removeSpecialCharsFromString(text: String) -> String
 }
 
-struct ContactViewModel : ContactViewModelProtocol {
+struct ContactViewModel {
     
-    private var searchModel = SearchModel()
-    private var sectionModel = SectionModel()
+    var currentSubModel : CurrentModelProtocol {
+        if searchIsActive {
+            return searchModel
+        }
+        return sectionModel
+    }
+    
+    private var searchModel = SearchModel.sharedInstance
+    private var sectionModel = SectionModel.sharedInstance
 
     private var searchIsActive : Bool {
         return searchModel.searchIsActive
@@ -58,59 +65,28 @@ struct ContactViewModel : ContactViewModelProtocol {
     }
     
     func setupTableViewCell(cell : ContactsTableViewCell,indexPath : IndexPath) -> ContactsTableViewCell {
-        
-        if searchIsActive {
-            cell.nameLabel.text = searchModel.searchResults[indexPath.row].firstName
-            cell.numberLabel.text = searchModel.searchResults[indexPath.row].firstPhoneNumber
-        }
-        else {
-            let sectionContact = sectionModel.rowsForSection(indexPath: indexPath)
-            cell.nameLabel.text = sectionContact.firstName
-            cell.numberLabel.text = sectionContact.firstPhoneNumber
-        }
-        return cell
+        return currentSubModel.setupTableViewCell(cell: cell, indexPath: indexPath)
     }
     
     var numberOfSections : Int {
-        
-        if searchIsActive {
-            return 1
-        }
-        return sectionModel.letters.count
+        return currentSubModel.numberOfSections
     }
     
     func titleForHeaders(section : Int) -> String? {
-        if searchIsActive {
-            return nil
-        }
-        return String(sectionModel.letters.sorted()[section])
+        return currentSubModel.titleForHeaders(section: section)
     }
     
-    func sectionIndexTitles() -> [String] {
-        if searchIsActive {
-            return []
-        }
-        return sectionModel.letters.sorted().map()  { (char) -> String in
-            return String(char)
-        }
+    mutating func sectionIndexTitles() -> [String] {
+        return currentSubModel.sectionIndexTitles()
     }
     
     
     func numberOfRowsInSection(section : Int) -> Int {
-        if searchIsActive {
-            return searchModel.searchResults.count
-        }
-        let alphabet = sectionModel.letters.sorted()[section]
-        return sectionModel.contactsDictionary[alphabet]!.count
+        return currentSubModel.numberOfRowsInSection(section: section)
     }
     
     func didSelectRowReturnContact(indexPath : IndexPath) -> ContactModel {
-        if searchIsActive {
-            return searchModel.searchResults[indexPath.row]
-        }
-        else{
-            return sectionModel.findContactForIndexPath(indexPath: indexPath)
-        }
+        return currentSubModel.didSelectRowReturnContact(indexPath: indexPath)
     }
 
     func removeSpecialCharsFromString(text: String) -> String {

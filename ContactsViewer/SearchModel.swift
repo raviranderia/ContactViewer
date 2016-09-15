@@ -9,17 +9,39 @@
 import Foundation
 import UIKit
 
-protocol SearchModelProtocol {
-    var searchResults : [ContactModel] {get}
-    mutating func generateContactArray() -> [ContactModel]
-    mutating func updateSearchResults(text : String)
-    mutating func setSearchActive()
-    mutating func setSearchInactive()
-}
-
-struct SearchModel : SearchModelProtocol {
+struct SearchModel : CurrentModelProtocol,Singleton {
     
     private var contacts = [ContactModel]()
+    
+    static let sharedInstance = SearchModel()
+    private init() {}
+    
+    var numberOfSections: Int {
+        return 1
+    }
+    
+    func setupTableViewCell(cell: ContactsTableViewCell, indexPath: IndexPath) -> ContactsTableViewCell {
+        
+        cell.nameLabel.text = searchResults[indexPath.row].firstName
+        cell.numberLabel.text = searchResults[indexPath.row].firstPhoneNumber
+        return cell
+    }
+    
+    func titleForHeaders(section: Int) -> String? {
+        return nil
+    }
+    
+    func sectionIndexTitles() -> [String] {
+        return []
+    }
+    
+    func numberOfRowsInSection(section: Int) -> Int {
+        return searchResults.count
+    }
+    
+    func didSelectRowReturnContact(indexPath : IndexPath) -> ContactModel {
+        return searchResults[indexPath.row]
+    }
     
     private var contactsFramework = ContactsFetcher()
     private var filteredContacts = [ContactModel]()
