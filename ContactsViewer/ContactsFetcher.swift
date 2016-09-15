@@ -9,23 +9,12 @@
 import Foundation
 import Contacts
 
-protocol ContactsFetcherProtocol {
-    func enumerateContacts(with: CNContactFetchRequest, usingBlock: (CNContact, UnsafeMutablePointer<ObjCBool>) -> Void)
-}
 
-extension CNContactStore : ContactsFetcherProtocol {
+struct ContactsFetcher {
     
-    internal func enumerateContacts(with: CNContactFetchRequest, usingBlock: (CNContact, UnsafeMutablePointer<ObjCBool>) -> Void) {
-        self.enumerateContacts(with: with, usingBlock: usingBlock)
-    }
-}
-
-class ContactsFetcher {
+    private let store: CNContactStore
     
-    private let store: ContactsFetcherProtocol
-    private let contactModel = ContactModel()
-    
-    init(contactStore: ContactsFetcherProtocol = CNContactStore()) {
+    init(contactStore: CNContactStore = CNContactStore()) {
         store = contactStore
     }
     

@@ -9,17 +9,13 @@
 import Foundation
 import Contacts
 
-class ContactModel {
+struct ContactModel :Equatable {
     var firstName : String
     var firstPhoneNumber : String?
     
-    init(firstName : String, firstPhoneNumber : String?) {
+    init(firstName : String = "", firstPhoneNumber : String?) {
         self.firstName = firstName
         self.firstPhoneNumber = firstPhoneNumber
-    }
-    
-    init(){
-        self.firstName = ""
     }
     
     static func convertToContactModel(contactArray : [CNContact]) -> [ContactModel] {
@@ -40,4 +36,9 @@ class ContactModel {
         return phoneNumber.first?.value.stringValue
         
     }
+    
+    static func == (contact1 : ContactModel,contact2 :ContactModel) -> Bool {
+        return contact1.firstName == contact2.firstName && contact1.firstPhoneNumber == contact2.firstPhoneNumber
+    }
+    
 }

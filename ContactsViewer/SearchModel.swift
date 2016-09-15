@@ -9,8 +9,15 @@
 import Foundation
 import UIKit
 
+protocol SearchModelProtocol {
+    var searchResults : [ContactModel] {get}
+    mutating func generateContactArray() -> [ContactModel]
+    mutating func updateSearchResults(text : String)
+    mutating func setSearchActive()
+    mutating func setSearchInactive()
+}
 
-class SearchModel {
+struct SearchModel : SearchModelProtocol {
     
     private var contacts = [ContactModel]()
     
@@ -27,23 +34,23 @@ class SearchModel {
     }
 
     //Returns all contacts from the phonebook
-    func generateContactArray() -> [ContactModel]{
-        self.contacts = contactsFramework.returnAllContacts()
-        return self.contacts
+    mutating func generateContactArray() -> [ContactModel]{
+        contacts = contactsFramework.returnAllContacts()
+        return contacts
     }
     
     //Search Helper Functions
-    func updateSearchResults(text : String){
+    mutating func updateSearchResults(text : String){
         filteredContacts.removeAll(keepingCapacity: false)
         filterContentForSearchText(searchText: text)
     }
     
-    func setSearchActive(){
-        self.searchIsActive = true
+    mutating func setSearchActive(){
+        searchIsActive = true
     }
     
-    func setSearchInactive(){
-        self.searchIsActive = false
+    mutating func setSearchInactive(){
+        searchIsActive = false
     }
     
     
@@ -51,9 +58,9 @@ class SearchModel {
 
     
     
-    private func filterContentForSearchText(searchText: String, scope: String = "All") {
+    private mutating func filterContentForSearchText(searchText: String, scope: String = "All") {
         filteredContacts = contacts.filter { contact in
-            return contact.firstName.contains(searchText)
+            return contact.firstName.lowercased().contains(searchText.lowercased())
         }
     }
     

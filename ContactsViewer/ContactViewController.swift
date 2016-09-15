@@ -10,7 +10,6 @@ import UIKit
 import Contacts
 import ContactsUI
 
-
 class ContactViewController: UIViewController,UITableViewDelegate,UITableViewDataSource, UISearchResultsUpdating,UISearchControllerDelegate  {
 
     @IBOutlet weak var contactsTableView: UITableView!
@@ -22,7 +21,7 @@ class ContactViewController: UIViewController,UITableViewDelegate,UITableViewDat
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        self.setupSearchController()
+        setupSearchController()
         DispatchQueue.global().async {
             self.contactViewModel.generateContactArrayAndSectionDictionary()
             DispatchQueue.main.async {
@@ -32,15 +31,15 @@ class ContactViewController: UIViewController,UITableViewDelegate,UITableViewDat
     }
     
     func setupSearchController() {
-        self.resultSearchController = ({
+        resultSearchController = ({
             let controller = UISearchController(searchResultsController: nil)
             controller.searchResultsUpdater = self
             controller.dimsBackgroundDuringPresentation = false
             controller.searchBar.sizeToFit()
-            self.contactsTableView.tableHeaderView = controller.searchBar
+            contactsTableView.tableHeaderView = controller.searchBar
             return controller
         })()
-        self.resultSearchController.delegate = self
+        resultSearchController.delegate = self
 
     }
 
@@ -72,25 +71,29 @@ class ContactViewController: UIViewController,UITableViewDelegate,UITableViewDat
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        let contact = self.contactViewModel.didSelectRowReturnContact(indexPath: indexPath)
+        let contact = contactViewModel.didSelectRowReturnContact(indexPath: indexPath)
         presentCallAlertController(name: contact.firstName,number: contact.firstPhoneNumber!)
+    }
+    
+    func sectionIndexTitles(for tableView: UITableView) -> [String]? {
+        return contactViewModel.sectionIndexTitles()
     }
     
     func willPresentSearchController(_ searchController: UISearchController) {
         print("setActive")
-        self.contactViewModel.setSearchActive()
+        contactViewModel.setSearchActive()
     }
     
     func willDismissSearchController(_ searchController: UISearchController) {
         print("dismissed")
-        self.contactViewModel.setSearchInactive()
+        contactViewModel.setSearchInactive()
     }
     
     func updateSearchResults(for searchController: UISearchController) {
         print("updated")
         print(resultSearchController.searchBar.text)
-        self.contactViewModel.updateSearchResults(text: resultSearchController.searchBar.text!)
-        self.contactsTableView.reloadData()
+        contactViewModel.updateSearchResults(text: resultSearchController.searchBar.text!)
+        contactsTableView.reloadData()
     }
     
     //Call Function
@@ -103,7 +106,7 @@ class ContactViewController: UIViewController,UITableViewDelegate,UITableViewDat
             }
         }
         else{
-            self.presentErrorAlertController()
+            presentErrorAlertController()
         }
     }
     
@@ -122,11 +125,11 @@ class ContactViewController: UIViewController,UITableViewDelegate,UITableViewDat
         }
         alertController.addAction(OKAction)
         
-        if contactViewModel.searchIsActive{
-            self.resultSearchController.present(alertController, animated: true, completion: nil)
+        if resultSearchController.isActive {
+            resultSearchController.present(alertController, animated: true, completion: nil)
         }
         else{
-            self.present(alertController, animated: true, completion:nil)
+            present(alertController, animated: true, completion:nil)
         }
     }
     
@@ -138,11 +141,11 @@ class ContactViewController: UIViewController,UITableViewDelegate,UITableViewDat
         }
         alertController.addAction(cancelAction)
         
-        if contactViewModel.searchIsActive {
-            self.resultSearchController.present(alertController, animated: true, completion: nil)
+        if resultSearchController.isActive {
+            resultSearchController.present(alertController, animated: true, completion: nil)
         }
         else{
-            self.present(alertController, animated: true, completion:nil)
+            present(alertController, animated: true, completion:nil)
         }
         
     }

@@ -8,19 +8,37 @@
 
 import Foundation
 
+protocol SectionModelProtocol {
+    mutating func generateSectionsForModel( contacts : [ContactModel] )
+    func rowsForSection(indexPath : IndexPath) -> ContactModel
+    func findContactForIndexPath(indexPath : IndexPath) -> ContactModel
+}
 
-class SectionModel {
+
+struct SectionModel : SectionModelProtocol {
     
-    var letters = [Character]()
-    var contactsDictionary = [Character: [ContactModel]]()
+    private(set) var letters = [Character]()
+    private(set) var contactsDictionary = [ Character : [ContactModel] ]()
     
-    func generateSectionsForModel(contacts : [ContactModel]) {
-        self.convertContactsToADictionaryModelForSections(contactsArray: contacts)
+    mutating func generateSectionsForModel( contacts : [ContactModel] ) {
+        convertContactsToADictionaryModelForSections(contactsArray: contacts)
     }
     
-    func convertContactsToADictionaryModelForSections(contactsArray : [ContactModel]) {
+    func rowsForSection(indexPath : IndexPath) -> ContactModel {
         
-        letters = self.makeLetterArray(contactsArray: contactsArray)
+        let contactArrayForCharacter = contactsDictionary[letters.sorted()[indexPath.section]]
+        return contactArrayForCharacter![indexPath.row]
+        
+    }
+    
+    func findContactForIndexPath(indexPath : IndexPath) -> ContactModel {
+        let sectionContact = rowsForSection(indexPath: indexPath)
+        return sectionContact
+    }
+    
+    private mutating func convertContactsToADictionaryModelForSections(contactsArray : [ContactModel]) {
+        
+        letters = makeLetterArray(contactsArray: contactsArray)
         letters = letters.reduce([], { (list, name) -> [Character] in
             if !list.contains(name) {
                 return list + [name]
@@ -37,7 +55,6 @@ class SectionModel {
         }
     }
     
-
     private func makeLetterArray(contactsArray : [ContactModel]) -> [Character] {
         
         let contactsWithNames = contactsArray.filter { (contact) -> Bool in
@@ -46,22 +63,8 @@ class SectionModel {
         
         return contactsWithNames.map { (contact) -> Character in
             return contact.firstName[contact.firstName.startIndex]
-        }.sorted()
-
-    }
-    
-    func rowsForSection(indexPath : IndexPath) -> ContactModel {
-        
-        let contactArrayForCharacter = contactsDictionary[letters.sorted()[indexPath.section]]
-        return contactArrayForCharacter![indexPath.row]
+            }.sorted()
         
     }
-    
-    func findContactForIndexPath(indexPath : IndexPath) -> ContactModel {
-        let sectionContact = rowsForSection(indexPath: indexPath)
-        return sectionContact
-    }
-    
-    
     
 }

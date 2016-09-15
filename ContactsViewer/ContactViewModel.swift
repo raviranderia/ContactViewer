@@ -7,27 +7,54 @@
 //
 
 import Foundation
+import UIKit
 
-class ContactViewModel {
+protocol ContactViewModelProtocol {
+   
+    //tableView Helper methods
+    var numberOfSections : Int {get}
+    func setupTableViewCell(cell : ContactsTableViewCell,indexPath : IndexPath) -> ContactsTableViewCell
+    func titleForHeaders(section : Int) -> String?
+    func sectionIndexTitles() -> [String]
+    func numberOfRowsInSection(section : Int) -> Int
+    func didSelectRowReturnContact(indexPath : IndexPath) -> ContactModel
+
+    //UISearchController helper methods
+    mutating func updateSearchResults(text : String)
+    mutating func setSearchActive()
+    mutating func setSearchInactive()
     
-    var searchModel = SearchModel()
-    var sectionModel = SectionModel()
+    //loading contacts initially
+    mutating func generateContactArrayAndSectionDictionary()
+    
+    //general helper function
+    func removeSpecialCharsFromString(text: String) -> String
+}
 
-    var searchIsActive : Bool {
+struct ContactViewModel : ContactViewModelProtocol {
+    
+    private var searchModel = SearchModel()
+    private var sectionModel = SectionModel()
+
+    private var searchIsActive : Bool {
         return searchModel.searchIsActive
     }
     
-    func setSearchActive(){
-        self.searchModel.setSearchActive()
+    mutating func setSearchActive(){
+        searchModel.setSearchActive()
     }
     
-    func setSearchInactive(){
-        self.searchModel.setSearchInactive()
+    mutating func setSearchInactive(){
+        searchModel.setSearchInactive()
     }
     
-    func generateContactArrayAndSectionDictionary() {
+    mutating func updateSearchResults(text : String) {
+        searchModel.updateSearchResults(text: text)
+    }
+    
+    mutating func generateContactArrayAndSectionDictionary() {
         
-        self.sectionModel.generateSectionsForModel(contacts: self.searchModel.generateContactArray())
+        sectionModel.generateSectionsForModel(contacts: searchModel.generateContactArray())
     }
     
     func setupTableViewCell(cell : ContactsTableViewCell,indexPath : IndexPath) -> ContactsTableViewCell {
@@ -42,7 +69,6 @@ class ContactViewModel {
             cell.numberLabel.text = sectionContact.firstPhoneNumber
         }
         return cell
-        
     }
     
     var numberOfSections : Int {
@@ -60,10 +86,19 @@ class ContactViewModel {
         return String(sectionModel.letters.sorted()[section])
     }
     
+    func sectionIndexTitles() -> [String] {
+        if searchIsActive {
+            return []
+        }
+        return sectionModel.letters.sorted().map()  { (char) -> String in
+            return String(char)
+        }
+    }
+    
     
     func numberOfRowsInSection(section : Int) -> Int {
         if searchIsActive {
-            return self.searchModel.searchResults.count
+            return searchModel.searchResults.count
         }
         let alphabet = sectionModel.letters.sorted()[section]
         return sectionModel.contactsDictionary[alphabet]!.count
@@ -71,18 +106,13 @@ class ContactViewModel {
     
     func didSelectRowReturnContact(indexPath : IndexPath) -> ContactModel {
         if searchIsActive {
-            return self.searchModel.searchResults[indexPath.row]
+            return searchModel.searchResults[indexPath.row]
         }
         else{
-            return self.sectionModel.findContactForIndexPath(indexPath: indexPath)
+            return sectionModel.findContactForIndexPath(indexPath: indexPath)
         }
     }
-    
-    func updateSearchResults(text : String) {
-        searchModel.updateSearchResults(text: text)
-    }
-    
-    
+
     func removeSpecialCharsFromString(text: String) -> String {
         let okayChars : Set<Character> =
             Set("1234567890+".characters)
