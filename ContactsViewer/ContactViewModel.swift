@@ -9,39 +9,17 @@
 import Foundation
 import UIKit
 
-protocol ContactViewModelProtocol {
-   
-    //tableView Helper methods
-    var numberOfSections : Int {get}
-    func setupTableViewCell(cell : ContactsTableViewCell,indexPath : IndexPath) -> ContactsTableViewCell
-    func titleForHeaders(section : Int) -> String?
-    func sectionIndexTitles() -> [String]
-    func numberOfRowsInSection(section : Int) -> Int
-    func didSelectRowReturnContact(indexPath : IndexPath) -> ContactModel
-
-    //UISearchController helper methods
-    mutating func updateSearchResults(text : String)
-    mutating func setSearchActive()
-    mutating func setSearchInactive()
-    
-    //loading contacts initially
-    mutating func generateContactArrayAndSectionDictionary()
-    
-    //general helper function
-    func removeSpecialCharsFromString(text: String) -> String
-}
-
 struct ContactViewModel {
     
-    var currentSubModel : CurrentModelProtocol {
+    var currentSubModel : CurrentSubModelProtocol {
         if searchIsActive {
             return searchModel
         }
         return sectionModel
     }
     
-    private var searchModel = SearchModel.sharedInstance
-    private var sectionModel = SectionModel.sharedInstance
+    private var searchModel = SearchModelView()
+    private var sectionModel = SectionModelView()
 
     private var searchIsActive : Bool {
         return searchModel.searchIsActive

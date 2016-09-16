@@ -136,9 +136,8 @@ class ContactViewController: UIViewController,UITableViewDelegate,UITableViewDat
     func presentErrorAlertController(){
         let alertController = UIAlertController(title: "Error", message: "Cannot call since no number is associated with this contact" , preferredStyle: .alert)
         
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action:UIAlertAction!) in
-            print("cancelled")
-        }
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        
         alertController.addAction(cancelAction)
         
         if resultSearchController.isActive {

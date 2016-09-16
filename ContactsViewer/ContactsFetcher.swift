@@ -18,14 +18,19 @@ struct ContactsFetcher {
         store = contactStore
     }
     
+    //TODO: Pass Error if error while loading contacts
+    
     func returnAllContacts() -> [ContactModel] {
         
         var contacts = [CNContact]()
-        let keysToFetch = [CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
+        let keysToFetch : [CNKeyDescriptor] = [CNContactGivenNameKey,
                            CNContactImageDataKey,
-                           CNContactPhoneNumbersKey] as [Any]
+                           CNContactPhoneNumbersKey].map { (key) -> CNKeyDescriptor in
+                            return key as CNKeyDescriptor
+                            }
         
-        let fetchRequest = CNContactFetchRequest(keysToFetch: keysToFetch as! [CNKeyDescriptor])
+        
+        let fetchRequest = CNContactFetchRequest(keysToFetch: keysToFetch)
         
         do {
             

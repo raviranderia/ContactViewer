@@ -8,23 +8,20 @@
 
 import Foundation
 
-struct SectionModel : CurrentModelProtocol,Singleton {
+struct SectionModelView : CurrentSubModelProtocol {
     
     private(set) var letters = [Character]()
     private(set) var contactsDictionary = [ Character : [ContactModel] ]()
     
-    static let sharedInstance = SectionModel()
-    private init() {}
+    //TableView Helper Methods - SubModel
     
     var numberOfSections: Int {
         return letters.count
     }
     
     func rowsForSection(indexPath : IndexPath) -> ContactModel {
-        
         let contactArrayForCharacter = contactsDictionary[letters.sorted()[indexPath.section]]
         return contactArrayForCharacter![indexPath.row]
-        
     }
     
     func setupTableViewCell(cell: ContactsTableViewCell, indexPath: IndexPath) -> ContactsTableViewCell {
@@ -32,7 +29,6 @@ struct SectionModel : CurrentModelProtocol,Singleton {
         let sectionContact = rowsForSection(indexPath: indexPath)
         cell.nameLabel.text = sectionContact.firstName
         cell.numberLabel.text = sectionContact.firstPhoneNumber
-
         return cell
     }
     
@@ -83,7 +79,7 @@ struct SectionModel : CurrentModelProtocol,Singleton {
         }
     }
     
-    func makeLetterArray(contactsArray : [ContactModel]) -> [Character] {
+    private func makeLetterArray(contactsArray : [ContactModel]) -> [Character] {
         
         let contactsWithNames = contactsArray.filter { (contact) -> Bool in
             return contact.firstName != ""

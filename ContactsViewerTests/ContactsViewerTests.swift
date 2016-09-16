@@ -84,7 +84,7 @@ class ContactsViewerTests: XCTestCase {
                               "P" : [contact3],
                               "M" : [contact4]]
         
-        let sectionModelObject = SectionModel()
+        var sectionModelObject = SectionModel()
         sectionModelObject.convertContactsToADictionaryModelForSections(contactsArray: contactArray)
         
         

@@ -9,19 +9,19 @@
 import Foundation
 import UIKit
 
-struct SearchModel : CurrentModelProtocol,Singleton {
+struct SearchModelView : CurrentSubModelProtocol {
     
+    private var contactsFramework = ContactsFetcher()
     private var contacts = [ContactModel]()
+    private(set) var searchResults = [ContactModel]()
+    private(set) var searchIsActive = Bool()
     
-    static let sharedInstance = SearchModel()
-    private init() {}
-    
+    //TableView Helper Methods - SubModel
     var numberOfSections: Int {
         return 1
     }
     
     func setupTableViewCell(cell: ContactsTableViewCell, indexPath: IndexPath) -> ContactsTableViewCell {
-        
         cell.nameLabel.text = searchResults[indexPath.row].firstName
         cell.numberLabel.text = searchResults[indexPath.row].firstPhoneNumber
         return cell
@@ -42,18 +42,6 @@ struct SearchModel : CurrentModelProtocol,Singleton {
     func didSelectRowReturnContact(indexPath : IndexPath) -> ContactModel {
         return searchResults[indexPath.row]
     }
-    
-    private var contactsFramework = ContactsFetcher()
-    private var filteredContacts = [ContactModel]()
-    private(set) var searchIsActive = Bool()
- 
-    //Returns contactList based on search text
-    var searchResults : [ContactModel] {
-        if searchIsActive {
-            return filteredContacts
-        }
-        return []
-    }
 
     //Returns all contacts from the phonebook
     mutating func generateContactArray() -> [ContactModel]{
@@ -63,7 +51,7 @@ struct SearchModel : CurrentModelProtocol,Singleton {
     
     //Search Helper Functions
     mutating func updateSearchResults(text : String){
-        filteredContacts.removeAll(keepingCapacity: false)
+        searchResults.removeAll(keepingCapacity: false)
         filterContentForSearchText(searchText: text)
     }
     
@@ -75,13 +63,8 @@ struct SearchModel : CurrentModelProtocol,Singleton {
         searchIsActive = false
     }
     
-    
-    //Setup TableView Function
-
-    
-    
     private mutating func filterContentForSearchText(searchText: String, scope: String = "All") {
-        filteredContacts = contacts.filter { contact in
+        searchResults = contacts.filter { contact in
             return contact.firstName.lowercased().contains(searchText.lowercased()) || contact.firstPhoneNumber!.contains((searchText))
         }
     }

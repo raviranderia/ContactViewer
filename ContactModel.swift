@@ -12,12 +12,7 @@ import Contacts
 struct ContactModel :Equatable {
     var firstName : String
     var firstPhoneNumber : String?
-    
-    init(firstName : String = "", firstPhoneNumber : String?) {
-        self.firstName = firstName
-        self.firstPhoneNumber = firstPhoneNumber
-    }
-    
+        
     static func convertToContactModel(contactArray : [CNContact]) -> [ContactModel] {
         
         var contactsModel = [ContactModel]()

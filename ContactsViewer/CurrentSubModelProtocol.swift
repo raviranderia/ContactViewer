@@ -8,13 +8,7 @@
 
 import Foundation
 
-
-
-protocol Singleton {
-    static var sharedInstance: Self { get }
-}
-
-protocol CurrentModelProtocol {
+protocol CurrentSubModelProtocol {
     
     var numberOfSections : Int {get}
     func setupTableViewCell(cell : ContactsTableViewCell,indexPath : IndexPath) -> ContactsTableViewCell
